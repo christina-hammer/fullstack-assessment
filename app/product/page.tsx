@@ -17,6 +17,7 @@ interface Product {
   imageUrls: string[];
   featureBullets: string[];
   retailerSku: string;
+  retailPrice: number;
 }
 
 export default function ProductPage() {
@@ -115,7 +116,10 @@ export default function ProductPage() {
               <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
               <p className="text-sm text-muted-foreground">SKU: {product.retailerSku}</p>
             </div>
-
+            <div className="flex">
+              <h4 className="mr-1">Price:</h4>
+              <span>${product.retailPrice}</span>
+            </div>
             {product.featureBullets.length > 0 && (
               <Card>
                 <CardContent className="pt-6">

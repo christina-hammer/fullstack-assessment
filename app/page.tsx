@@ -29,6 +29,7 @@ interface Product {
   categoryName: string;
   subCategoryName: string;
   imageUrls: string[];
+  retailPrice: number;
 }
 
 export default function Home() {
@@ -36,12 +37,12 @@ export default function Home() {
   const [categories, setCategories] = useState<string[]>([]);
   const [subCategories, setSubCategories] = useState<string[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(
-    undefined
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+   ""
   );
   const [selectedSubCategory, setSelectedSubCategory] = useState<
-    string | undefined
-  >(undefined);
+    string
+  >("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,12 +53,14 @@ export default function Home() {
 
   useEffect(() => {
     if (selectedCategory) {
-      fetch(`/api/subcategories`)
+      const params = new URLSearchParams();
+      params.append("category", selectedCategory);
+      fetch(`/api/subcategories?${params}`)
         .then((res) => res.json())
         .then((data) => setSubCategories(data.subCategories));
     } else {
       setSubCategories([]);
-      setSelectedSubCategory(undefined);
+      setSelectedSubCategory("");
     }
   }, [selectedCategory]);
 
@@ -67,7 +70,6 @@ export default function Home() {
     if (search) params.append("search", search);
     if (selectedCategory) params.append("category", selectedCategory);
     if (selectedSubCategory) params.append("subCategory", selectedSubCategory);
-    params.append("limit", "20");
 
     fetch(`/api/products?${params}`)
       .then((res) => res.json())
@@ -96,7 +98,7 @@ export default function Home() {
 
             <Select
               value={selectedCategory}
-              onValueChange={(value) => setSelectedCategory(value || undefined)}
+              onValueChange={(value) => setSelectedCategory(value || "")}
             >
               <SelectTrigger className="w-full md:w-[200px]">
                 <SelectValue placeholder="All Categories" />
@@ -114,7 +116,7 @@ export default function Home() {
               <Select
                 value={selectedSubCategory}
                 onValueChange={(value) =>
-                  setSelectedSubCategory(value || undefined)
+                  setSelectedSubCategory(value || "")
                 }
               >
                 <SelectTrigger className="w-full md:w-[200px]">
@@ -135,8 +137,8 @@ export default function Home() {
                 variant="outline"
                 onClick={() => {
                   setSearch("");
-                  setSelectedCategory(undefined);
-                  setSelectedSubCategory(undefined);
+                  setSelectedCategory("");
+                  setSelectedSubCategory("");
                 }}
               >
                 Clear Filters
@@ -172,7 +174,7 @@ export default function Home() {
                   <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                     <CardHeader className="p-0">
                       <div className="relative h-48 w-full overflow-hidden rounded-t-lg bg-muted">
-                        {product.imageUrls[0] && (
+                        {product.imageUrls && product.imageUrls.length > 0 && product.imageUrls[0] && (
                           <Image
                             src={product.imageUrls[0]}
                             alt={product.title}
@@ -194,9 +196,10 @@ export default function Home() {
                         <Badge variant="outline">
                           {product.subCategoryName}
                         </Badge>
+                        <span>{`Price: $${product.retailPrice}`}</span>
                       </CardDescription>
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="mt-auto">
                       <Button variant="outline" className="w-full">
                         View Details
                       </Button>
